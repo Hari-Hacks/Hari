@@ -1,0 +1,51 @@
+hand cricket
+1. 2 teams, pc vs user
+2. toss:
+	selecting if odd or eve
+	random numbers
+	sum whether odd or eve
+	winning team choose to bat or bowl
+3. batting team:
+	plays until both hv same numbers
+	same numbers out
+4. bowling team:
+	try to make the batting team out
+	same numbers out
+5. scored score by batting team +1 is the target
+6. batting team starts to bowl
+7. same logic of 3 and 4 applies
+8. if bowling team scores equal or more than the target they get to win
+9. if equal its a tie (target-1) and 6 ball match goes on with 2 wickets getting wicketed:
+	bowling team gets to bat first
+10. if bowling or batting team wins they get rewards
+************************************************************************
+toss completed
+batting:
+	user_choice paakanum
+	under while loop
+	user input
+	pc random numbers
+	score=user num
+	if equal break
+nester list:
+	nested list num=6
+	a=bat no.
+	[[a,a,a,a,a,a],[a,a,a..]]
+	list goes on until 6 nested lists r there
+	each main list will be printed after each over
+after 1st innings print total score, target, whose going to bowl or bat
+***********************************************************************
+2nd innings
+user choice paakanum
+	under while loop
+	user input
+	pc random numbers
+	sees score reaches target or not
+	if target not reached 1stu user choice padi out or not who won
+	if equal super innings
+************************************************************************
+opp. to user choice
+	six balls 2 innings score target reach or not 
+according to score win or not
+	
+	
