@@ -49,12 +49,14 @@ def main(t,f):
             
             l1.grid(row=1,column=0,padx=10,pady=10)
             
-            e=Entry(master=fram3)
+            e=Entry(master=fram3,font=("Calibri",11))
+            e.config(width=35,bg="#BCC6CC",bd=4)
             
-            e1=Entry(master=fram3)
+            e1=Entry(master=fram3,font=("Calibri",11), show = '*')
+            e1.config(width=35,bg="#BCC6CC",bd=4)
             
             b2=Button(master=fram4,text='Create',command=get,bg="#040720",fg="white",activebackground='cyan')
-            b2.config(font=fonts3,bd=0)
+            b2.config(font=("Calibri",18,'bold'),bd=0)
             change_on_hover(b2,"#663399","white")
 
             b3=Button(text='X',command=destroy1,bg='red',activebackground='red')
@@ -66,7 +68,7 @@ def main(t,f):
 
             b2.grid(row=0,column=0)
 
-            fram3.place(x=160,y=160)
+            fram3.place(x=75,y=160)
 
             fram4.place(x=270,y=280)
 
@@ -118,12 +120,14 @@ def main(t,f):
 
             l1.grid(row=1,column=0,padx=10,pady=10)
 
-            e=Entry(master=fram3)
+            e=Entry(master=fram3,font=("Calibri",11))
+            e.config(width=25,bg="#BCC6CC",bd=4)
 
-            e1=Entry(master=fram3)
+            e1=Entry(master=fram3,font=("Calibri",11), show ='*')
+            e1.config(width=25,bg="#BCC6CC",bd=4)
 
             b2=Button(master=fram4,text='Login',command=get,bg="#040720",fg="white",activebackground='cyan')
-            b2.config(font=fonts3,bd=0)
+            b2.config(font=("Calibri",18,'bold'),bd=0)
             change_on_hover(b2,"#663399","white")
 
             b3=Button(text='X',command=destroy1,bg='red',activebackground='red')
@@ -135,7 +139,7 @@ def main(t,f):
 
             b2.grid(row=0,column=0)
 
-            fram3.place(x=160,y=160)
+            fram3.place(x=130,y=160)
 
             fram4.place(x=270,y=280)
 
@@ -263,4 +267,4 @@ def main(t,f):
         b3.place(x=590,y=10)
         fram.place()
         win.mainloop()
-main(1,None)
+

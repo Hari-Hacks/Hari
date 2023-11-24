@@ -1,7 +1,7 @@
 import mysql.connector as mc
 from tkinter import *
 import I1,I2
-import E2 as E
+import E
 import pyperclip
 import pickle
 import os
@@ -94,15 +94,17 @@ def Create(L):
     check()
     cr.execute("Select * from Credentials where username='{}'".format(u))
     res=cr.fetchall()
-    
     if res==[]:
-        cr.execute("Insert into Credentials values('''{}''','''{}''','''{}''','''{}''','''{}''','''{}''')".format(u,sp[0],sp[1],sp[2],sp[3],sp[4]))
-        f=-1
-        cn.commit()
-        #Username and password created successfully
+            check()
+            cr.execute('''Insert into Credentials values('{}','{}','{}','{}','{}','{}')'''.format(u,sp[0],sp[1],sp[2],sp[3],sp[4]))
+            f=-1
+            cn.commit()
+
+            #Username and password created successfully
     else:
-        f=-2
-        #Username exists already
+            f=-2
+            #Username exists already
+    
 
 def Disp(o,s=''):
     l=['Encrypted message','Decrypted message','Correct encrypted message','Incorrect encrypted message','','File encrypted successfully and stored in the same folder','File decrypted successfully and stored in the same folder','File authenticated successfully','File not Found','File was not decryptable','Incorrect File Type']
@@ -115,7 +117,11 @@ def Disp(o,s=''):
         else:
             win.destroy()
     win=Tk()
-    win.geometry('800x600')
+    screen_width = win.winfo_screenwidth()
+    screen_height = win.winfo_screenheight()
+    x = (screen_width/2) - (626/2)
+    y = (screen_height/2) - (417/2)
+    win.geometry('%dx%d+%d+%d' % (626, 417, x, y))
     #For size of window
     win.resizable(width=0,height=0)
     #For ensuring resizing doesn't occur
@@ -125,14 +131,30 @@ def Disp(o,s=''):
     #For grid options weight=1 ensures grid can rescale with increas in row count
     win.grid_columnconfigure(0,weight=1)
     #For grid options weight=1 ensures grid can rescale with increas in row count
-    fram2=Frame(master=win,bg='black')
+
+    img=PhotoImage(file="back.png")
+    labelimg1=Label(win,width=626,height=417,image=img)
+    labelimg1.grid()
+
+    fram2=Frame(master=win,bg='#040720')
     #To esnure all items packed in fram2
-    l1=Label(master=fram2,text=l[o],fg='white',bg='black')
-    bt=Button(master=fram2,text=j[o],command=des)
+    l1=Label(master=fram2,text=l[o],fg='white',bg='#040720')
+    l1.config(font=("calibri",18,'bold'))
     l1.grid(row=0,column=0,padx=10,pady=10)
-    bt.grid(row=1,column=0,padx=10,pady=10)
     fram2.grid(row=0,column=0)
+    bt=Button(master=fram2,text=j[o],command=des,bg='#040720',activebackground='cyan',fg='white')
+    change_on_hover(bt,"#663399","white")
+    bt.config(font=("calibri",18,'bold'),bd=0)
+    bt.grid(row=1,column=0)
+    
     win.mainloop()
+
+fonts1=("Times New Roman",25,"bold")
+fonts2=("Times New Roman",15,"bold")
+fonts3=("Calibri",15,"bold")
+def change_on_hover(button,bg,fg):
+    button.bind("<Enter>",func=lambda e:button.config(background=bg, foreground=fg))
+    button.bind("<Leave>",func=lambda e:button.config(background= '#040720', foreground= 'white'))
 
 while flag==0:
     s=I1.main(t,f)
@@ -184,10 +206,11 @@ else:
                 dec=E.sd(inpu)
                 if dec:
                     Disp(opt,dec)
-                    
+                else:
+                    Disp(opt+2)
             elif opt==2:
                 #Authenticate
-                enc=E.sd(inpu)
+                enc=E.HS_authenticateme(inpu)
                 if enc:
                     Disp(opt)
                 else:
@@ -199,15 +222,15 @@ else:
             
             elif opt==4:
                 break
-            
             elif opt==5:
+            #File encryption
                 try:
                     f=open(inpu,'r')
                 except FileNotFoundError:
                     Disp(8)
                 else:
                     r=f.read()
-                    es=E.se(r)
+                    es=E.encrfile(r)
                     store=inpu.split('\\')[:-1]
                     store='\\'.join(store)+'\\encrypted.dat'
                     
@@ -216,6 +239,7 @@ else:
                     f.close()
                     Disp(5)
             elif opt==6:
+            #File decrypt
                 try:
                     f=open(inpu,'rb')
                 except FileNotFoundError:
@@ -226,15 +250,19 @@ else:
                             r=pickle.load(f)
                     except EOFError:
                             pass
+                    else:
+                        es=E.Filedecr(r[0])
+                        if es:
+                            pass
+                        else :
+                            Disp(9)
+                        store=inpu.split('\\')[:-1]
+                        store='\\'.join(store)+'\\decrypted.txt'
                     
-                    es=E.sd(r[0])
-                    store=inpu.split('\\')[:-1]
-                    store='\\'.join(store)+'\\decrypted.txt'
-                
-                    with open(store,'w') as f1:
-                        f1.write(es.strip("\'"))
-                    f.close()
-                    Disp(6)
+                        with open(store,'w') as f1:
+                            f1.write(es.strip("\'"))
+                        f.close()
+                        Disp(6)
             elif opt==7:
                 try:
                     if inpu[-3:]=='dat':
@@ -252,11 +280,11 @@ else:
                         except EOFError:
                                 pass
                         
-                        es=E.sd(r[0])
+                        es=E.HS_authenticate(r[0])
                         if es:
                             Disp(7)
                         else:
                             Disp(9)
                         f.close()
-                    
+               
                 
