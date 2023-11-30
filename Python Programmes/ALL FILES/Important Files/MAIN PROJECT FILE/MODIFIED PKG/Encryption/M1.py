@@ -254,7 +254,7 @@ else:
                         es=E.Filedecr(r[0])
                         if es:
                             pass
-                        else :
+                        elif :
                             Disp(9)
                         store=inpu.split('\\')[:-1]
                         store='\\'.join(store)+'\\decrypted.txt'

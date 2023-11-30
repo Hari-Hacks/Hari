@@ -353,7 +353,7 @@ def se(inpt,skey=''):
         secretkeyhash=hs_hashcode(skey)
         ttt=secretkeyhash+ttt
         #ttt is the main final encrypted message
-        return ttt
+        return ttt    
     except:
         return False
 def sd(inpt,skey=''):
@@ -368,7 +368,7 @@ def sd(inpt,skey=''):
             pass
         else:
             return False
-        #secretkey hash is remove
+        #secretkey hash is removedx
         inpt=inpt[500:]
         #hash is removed
         hash_value=inpt[-500::]
@@ -406,14 +406,13 @@ def encr(i,skey=''):
         i=repr(i)
         l=list(i)
         #between Random number generated
-        b=ran(4,37)
-        
+        b=ran(4,36)        
         randmid=''
         for i in range(b):
             randmid+=chr(ran(32,125))
         b=inttosys(b)
         #Terminal Random number Generator
-        n=ran(4,37)
+        n=ran(4,36)
         n=inttosys(n)
         a=systoint(n)
         randstr=''
@@ -446,12 +445,9 @@ def encr(i,skey=''):
         l=Matrix_Maker(ttt)
         l=Matrix_Jumbler(l)
         l=Matrixflip(l)
-        ttt=Matrixtostr(l)     
-
-        #ttt is encrypted message 
-        return ttt
-
-    
+        ttt=Matrixtostr(l)
+        #ttt is encrypted message
+        return ttt    
 
 def decr(i,skey=''):
     #Function decrypts message
@@ -492,6 +488,7 @@ def decr(i,skey=''):
             ttd+=tey[key.index(i[j])+33]
         
         #ttd is the decrypted message
+        ttd=ttd[1:-1:1]
         return ttd
     
 def intc(n):
@@ -605,6 +602,21 @@ def Matrixflip(l):
 #Functions Start
 
 from random import randint as ran
+'''def chrreplaceencr(s):
+    #Function follows all rules as next function
+    #It is used for encryption
+    '\\','[',']','(',')','{','}','"',"'",'<','>'
+    l=''
+    s=list(s)
+    for i in range(len(s)):
+        k=s[i]
+        if k=='\\':
+            s[i]='£'
+        elif k=='[':
+        elif k==']':
+        elif k=='(':
+        elif k==')':
+        elif k=='{':'''
 def chrreplace(s):
     #Function replaces all quotes, slashes and brackets
     #Error raises in SQL server due to the presence of
@@ -678,10 +690,12 @@ def hs_passverify(a,b):
 
 
 def encrfile(a,skey=''):
-    #funtions takes input a message and gives output which is stored in a file
+    #funtions takes input a file path and gives output which is stored in a file
     #output is False if message is non encryptable
     #output if no error will be  a string
-
+    f=open(a,'r')
+    a=f.read()
+    f.close()
     p=se(a,skey)
     smul=1
     for i in skey:
@@ -691,24 +705,29 @@ def encrfile(a,skey=''):
     #now p contains the encrypted text
     l=[]
     for i in p:
-        l.append(ord(i))+smul*len(skey)
+        l.append((ord(i))+smul*len(skey))
     #l contains the encrypted text
     #fileen will contain the entire encrypted text
-
     fileen=[]
     has=hs_hashcode(skey)
     for i in has:
         fileen.append(ord(i))
     fileen.extend(l)
+    fileen=str(fileen)
     #first 500 characters contains the hash of skey
     return fileen
 
 def Filedecr(a,skey=''):
-    #function takes input the contents of a file and returns a string which is the decrypted
-    #message
+    #function takes input the a file path and returns a string which is the decrypted
+    #message is a list output is a string
     #function returns False if message is incorrect
     #checking list of hash's ord
-
+    f=open(a,'r')
+    a=f.read()
+    f.close()
+    a=a[1:-1].split(', ')
+    for i in range(len(a)):
+        a[i]=int(a[i])
     haslsit=a[:500]
     a=a[500:]
     has=''
