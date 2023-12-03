@@ -26,7 +26,7 @@ Password4 varchar(30), \
 Password5 varchar(30))')
 conn()
 pygame.mixer.init()
-#pygame.mixer.music.load('login screen.mp3')
+pygame.mixer.music.load('login screen.mp3')
 pygame.mixer.music.play(loops=-1)
 pygame.mixer.music.set_volume(0.2)
 flag=0
