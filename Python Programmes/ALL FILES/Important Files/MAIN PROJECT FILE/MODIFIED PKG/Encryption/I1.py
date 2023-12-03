@@ -52,7 +52,7 @@ def main(t,f):
             e=Entry(master=fram3,font=("Calibri",11))
             e.config(width=35,bg="#BCC6CC",bd=4)
             
-            e1=Entry(master=fram3,font=("Calibri",11))
+            e1=Entry(master=fram3,font=("Calibri",11), show='*')
             e1.config(width=35,bg="#BCC6CC",bd=4)
             
             b2=Button(master=fram4,text='Create',command=get,bg="#040720",fg="white",activebackground='cyan')
@@ -123,7 +123,7 @@ def main(t,f):
             e=Entry(master=fram3,font=("Calibri",11))
             e.config(width=25,bg="#BCC6CC",bd=4)
 
-            e1=Entry(master=fram3,font=("Calibri",11))
+            e1=Entry(master=fram3,font=("Calibri",11),show='*')
             e1.config(width=25,bg="#BCC6CC",bd=4)
 
             b2=Button(master=fram4,text='Login',command=get,bg="#040720",fg="white",activebackground='cyan')

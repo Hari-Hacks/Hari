@@ -5,11 +5,12 @@ import E
 import pyperclip
 import pickle
 import os
+import pygame
 #Importing the files containing the interface code and encryption code
+import LoadingScreen
 
 cn=mc.connect(host='sql.freedb.tech',user='freedb_iehwf',password='NdVBt%!EkGepQ@4',database='freedb_XII Project')
 cr=cn.cursor()
-
 def conn():
     #To check if the connection is intact(as there is possibility of timeout
     global cn
@@ -24,6 +25,10 @@ Password3 varchar(30), \
 Password4 varchar(30), \
 Password5 varchar(30))')
 conn()
+pygame.mixer.init()
+pygame.mixer.music.load('login screen.mp3')
+pygame.mixer.music.play(loops=-1)
+pygame.mixer.music.set_volume(0.2)
 flag=0
 #To ensure 1st loop is running till correct credentials mentioned
 t=1
@@ -64,6 +69,7 @@ def Check(L):
         if x:
             #print('Credentials Valid')
             flag=1
+            play()
             #1st loop broken and proceed to 2nd stage(where encryption occurs)
         else:
             #print('Invalid Password')
@@ -104,11 +110,15 @@ def Create(L):
     else:
             f=-2
             #Username exists already
-    
-
 def Disp(o,s=''):
-    l=['Encrypted message','Decrypted message','Correct encrypted message','Incorrect encrypted message','','File encrypted successfully and stored in the same folder','File decrypted successfully and stored in the same folder','File authenticated successfully','File not Found','File was not decryptable','Incorrect File Type']
-    j=['Click to copy','Click to copy','Click to exit','Click to exit','','Click to exit','Click to exit','Click to exit','Click to exit','Click to exit','Click to exit']
+    def save_file():
+        from tkinter import filedialog
+        file_path = filedialog.asksaveasfilename(title='Save File', filetypes=(('Text Files', '*.txt'), ('All Files', '*.*')))
+        if file_path:
+            with open(file_path+'.txt', 'w') as file:
+                file.write(s)
+    l=['Encrypted message','Decrypted message','Correct encrypted message','Incorrect encrypted message','File may not be encrypted','File encrypted successfully','File decrypted successfully','File authenticated successfully','File not Found','File was not decryptable','Incorrect File Type','Message might not have been encrypted']
+    j=['Click to copy','Click to copy','Click to exit','Click to exit','','Click to exit','Click to exit','Click to exit','Click to exit','Click to exit','Click to exit','Click to exit']
     def des():
         n=o
         if n==0 or n==1:
@@ -142,6 +152,18 @@ def Disp(o,s=''):
     l1.config(font=("calibri",18,'bold'))
     l1.grid(row=0,column=0,padx=10,pady=10)
     fram2.grid(row=0,column=0)
+    if o==5:
+        #for file encryption
+        bton=Button(master=fram2,text='Save File',command=save_file,bg='#040720',activebackground='cyan',fg='white')
+        change_on_hover(bton,"#663399","white")
+        bton.config(font=("calibri",18,'bold'),bd=0)
+        bton.grid(row=2,column=0)
+    elif o==6:
+        #for file decryption
+        bton=Button(master=fram2,text='Save File',command=save_file,bg='#040720',activebackground='cyan',fg='white')
+        change_on_hover(bton,"#663399","white")
+        bton.config(font=("calibri",18,'bold'),bd=0)
+        bton.grid(row=2,column=0)
     bt=Button(master=fram2,text=j[o],command=des,bg='#040720',activebackground='cyan',fg='white')
     change_on_hover(bt,"#663399","white")
     bt.config(font=("calibri",18,'bold'),bd=0)
@@ -193,28 +215,28 @@ else:
             else:
                 inpu=''
             ####THIS IS THE INPUT FOR YOUR Encryption code
-
+            skey=L[2]
             opt=L[1]
             if opt==0:
                 #encrypt
-                enc=E.se(inpu)
+                enc=E.se(inpu,skey)
                 if enc:
                     Disp(opt,enc)
                     
             elif opt==1:
                 #Decrypt
-                dec=E.sd(inpu)
+                dec=E.sd(inpu,skey)
                 if dec:
                     Disp(opt,dec)
                 else:
                     Disp(opt+2)
             elif opt==2:
                 #Authenticate
-                enc=E.HS_authenticateme(inpu)
+                enc=E.HS_authenticateme(inpu,skey)
                 if enc:
                     Disp(opt)
                 else:
-                    Disp(opt+1)
+                    Disp(11)
                     
             elif opt==3:
                 #Signout
@@ -224,67 +246,42 @@ else:
                 break
             elif opt==5:
             #File encryption
+                if os.path.splitext(inpu)[-1].lower()!='.txt':
+                    #checking if extension of file is '.txt'
+                    Disp(10)
                 try:
                     f=open(inpu,'r')
                 except FileNotFoundError:
                     Disp(8)
                 else:
-                    r=f.read()
-                    es=E.encrfile(r)
-                    store=inpu.split('\\')[:-1]
-                    store='\\'.join(store)+'\\encrypted.dat'
-                    
-                    with open(store,'wb') as f1:
-                        pickle.dump([es],f1)
-                    f.close()
-                    Disp(5)
+                    es=E.encrfile(inpu,skey)
+                    Disp(5,es)
             elif opt==6:
             #File decrypt
+                if os.path.splitext(inpu)[-1].lower()!='.txt':
+                    Disp(10)
                 try:
                     f=open(inpu,'rb')
                 except FileNotFoundError:
                     Disp(8)
                 else:
-                    try:
-                        while True:
-                            r=pickle.load(f)
-                    except EOFError:
-                            pass
-                    else:
-                        es=E.Filedecr(r[0])
-                        if es:
-                            pass
-                        else:
-                            Disp(9)
-                        store=inpu.split('\\')[:-1]
-                        store='\\'.join(store)+'\\decrypted.txt'
-                    
-                        with open(store,'w') as f1:
-                            f1.write(es.strip("\'"))
-                        f.close()
-                        Disp(6)
+                    ds=E.Filedecr(inpu,skey)
+                    if ds:
+                        Disp(6,ds)
+                    else:Disp(9)
             elif opt==7:
+                if os.path.splitext(inpu)[-1].lower()!='.txt':
+                    Disp(10)
                 try:
-                    if inpu[-3:]=='dat':
-                        f=open(inpu,'rb')
-                    else:
-                        Disp(10)
-                        
+                    f=open(inpu,'r')                       
                 except FileNotFoundError:
                     Disp(8)
-                else:
-                    if inpu[-3:]=='dat':
-                        try:
-                            while True:
-                                r=pickle.load(f)
-                        except EOFError:
-                                pass
-                        
-                        es=E.HS_authenticate(r[0])
-                        if es:
-                            Disp(7)
-                        else:
-                            Disp(9)
-                        f.close()
+                else:    
+                    es=E.HS_authenticate(inpu,skey)
+                    if es:
+                        Disp(7)
+                    else:
+                        Disp(4)
+                    f.close()
                
                 

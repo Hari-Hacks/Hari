@@ -274,26 +274,6 @@ def HS_authenticateme(a,skey=''):
         return True
     else:
         return False
-
-
-def HS_authenticate(a,skey=''):
-    #Function authenticates the encrypted file
-    #function takes input the contents of the file 
-    #returns True of file contents are correct
-    #returns False otherwise
-
-    haslsit=a[:500]
-    a=a[500:]
-    has=''
-    for i in haslsit:
-        has=has+chr(i)
-    #l is the hash of skey taken as input
-    l=hs_hashcode(skey)
-    if l==has:
-        return True
-    else:
-        return False
-
 #Functions End
 
 #functions related to encryption 
@@ -726,8 +706,10 @@ def Filedecr(a,skey=''):
     a=f.read()
     f.close()
     a=a[1:-1].split(', ')
-    for i in range(len(a)):
-        a[i]=int(a[i])
+    try:
+        for i in range(len(a)):
+            a[i]=int(a[i])
+    except:return False
     haslsit=a[:500]
     a=a[500:]
     has=''
@@ -751,6 +733,40 @@ def Filedecr(a,skey=''):
     #p is the decrypted text
     return p
 
-#Functions End
+def HS_authenticate(a,skey=''):
+    #Function authenticates the encrypted file
+    #function takes input path of file
+    #returns True of file contents are correct
+    #returns False otherwise
+    f=open(a,'r')
+    a=f.read()
+    f.close()
+    a=a[1:-1].split(', ')
+    try:
+        for i in range(len(a)):
+            a[i]=int(a[i])
+    except:return False
+    haslsit=a[:500]
+    a=a[500:]
+    has=''
+    for i in haslsit:
+        has=has+chr(i)
+    #l is the hash of skey taken as input
+    l=hs_hashcode(skey)
+    if l==has:
+        pass
+    else:
+        return False
+    smul=1
+    for i in skey:
+        smul+=ord(i)
+    #dec will contain the decrypted text in reverse
+    dec=''
+    for i in a:
+        dec=dec+chr(i-smul*len(skey))
+    dec=dec[::-1]
+    return HS_authenticateme(dec,skey)
+    
 
+#Functions End
 
