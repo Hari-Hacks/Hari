@@ -41,9 +41,9 @@ for i in range(n//2-1, n):
 		elif i == n//2-1:
 			
 			if j == m//2-1:
-				print('  FATH', end="")
+				print('  IBU', end="")
 			elif j == m//2:
-				print('IBU', end="")
+				print('FATH', end="")
 			else:
 				print(' ', end="")
 				
