@@ -1,4 +1,32 @@
 from tkinter import *
+from tkinter import messagebox
+txt_mainmenu='''
+Hi Fellas!! This is the main window where you can encrypt and decrypt your information.
+
+Getting Started:
+1. Select the desired operation - Encryption or Decryption or Encrypt Text File or Decrypt Text File.
+2. Follow the prompts to input the necessary information.
+3. Enjoy peace of mind knowing your data is protected!
+
+Feel free to explore the menu options to learn more about our encryption methods and authentication. If you have any questions or need assistance, check out the Help section for detailed instructions.
+
+Thank you for choosing Black Shades Encryption Services for your encryption needs. Your security is our priority!
+
+LETS GET STARTED!!!!!
+'''
+txt_encrypt='''
+In this window, you can get your valuable texts or passwords encrypted.
+First, enter your text in the given field and another entry field, Secret Key, which is an optional field
+which is used to make your cipher text more secure,more likea password.
+If an invalid text is given in the entry field, it would show an error and you have to reenter the plain text.
+If 
+
+'''
+txt_decrypt='''r'''
+txt_auth='''r'''
+txt_encry_file='''r'''
+txt_decry_file='''r'''
+txt_auth_File='''r'''
 def choose_file():
     from tkinter import filedialog
     file_name=filedialog.askopenfilename()
@@ -21,6 +49,8 @@ def main(dec=None):
             global L
             win1.destroy()
             L=[None,4,'']
+        def show_help():
+                messagebox.showinfo('Help',txt_encrypt,icon='question')
             
         win.destroy()
         win1=Tk()
@@ -57,6 +87,9 @@ def main(dec=None):
         b3=Button(text='X',command=destroy1,bg='red',fg="black",activebackground='red')
         b3.place(x=590,y=10)
 
+        b4=Button(text='?',command=show_help,bg='yellow',fg='white',activebackground='yellow')
+        b4.place(x=560,y=6)
+
         win1.mainloop()
         
         
@@ -75,6 +108,8 @@ def main(dec=None):
             global L
             win1.destroy()
             L=[None,4,'']
+        def show_help():
+                messagebox.showinfo('Help',txt_decrypt,icon='question')
         win.destroy()
         win1=Tk()
         screen_width = win1.winfo_screenwidth()
@@ -110,6 +145,9 @@ def main(dec=None):
         b3=Button(text='X',command=destroy1,bg='red',fg="black",activebackground='red')
         b3.place(x=590,y=10)
 
+        b4=Button(text='?',command=show_help,bg='yellow',fg='white',activebackground='yellow')
+        b4.place(x=560,y=6)
+
         win1.mainloop()
 
     def file_encryption():
@@ -128,6 +166,8 @@ def main(dec=None):
             global L
             win1.destroy()
             L=[None,4,'']
+        def show_help():
+                messagebox.showinfo('Help',txt_encry_file,icon='question')
         win.destroy()
         
         win1=Tk()
@@ -158,6 +198,10 @@ def main(dec=None):
 
         b3=Button(text='X',command=destroy1,bg='red',activebackground='red')
         b3.place(x=590,y=10)
+
+        b5=Button(text='?',command=show_help,bg='yellow',fg='white',activebackground='yellow')
+        b5.place(x=560,y=6)
+        
         fram3.place(x=50,y=160)
         win1.mainloop()
 
@@ -176,6 +220,8 @@ def main(dec=None):
             global L
             win1.destroy()
             L=[None,4,'']
+        def show_help():
+                messagebox.showinfo('Help',txt_decry_file,icon='question')
         win.destroy()
         win1=Tk()
         screen_width = win1.winfo_screenwidth()
@@ -205,6 +251,10 @@ def main(dec=None):
 
         b3=Button(text='X',command=destroy1,bg='red',activebackground='red')
         b3.place(x=590,y=10)
+
+        b5=Button(text='?',command=show_help,bg='yellow',fg='white',activebackground='yellow')
+        b5.place(x=560,y=6)
+        
         win1.mainloop()
     def file_authentication():
         def get():
@@ -221,6 +271,8 @@ def main(dec=None):
             global L
             win1.destroy()
             L=[None,4,'']
+        def show_help():
+                messagebox.showinfo('Help',txt_auth_file,icon='question')
         win.destroy()
         win1=Tk()
         screen_width = win1.winfo_screenwidth()
@@ -251,6 +303,10 @@ def main(dec=None):
 
         b3=Button(text='X',command=destroy1,bg='red',activebackground='red')
         b3.place(x=590,y=10)
+
+        b5=Button(text='?',command=show_help,bg='yellow',fg='white',activebackground='yellow')
+        b5.place(x=560,y=6)
+        
         fram3.place(x=50,y=160)
         win1.mainloop()
     
@@ -269,6 +325,8 @@ def main(dec=None):
             global L
             win1.destroy()
             L=[None,4]
+        def show_help():
+                messagebox.showinfo('Help',txt_auth,icon='question')
         win.destroy()
         
         win1=Tk()
@@ -305,6 +363,9 @@ def main(dec=None):
         b3=Button(text='X',command=destroy1,bg='red',fg="black",activebackground='red')
         b3.place(x=590,y=10)
 
+        b4=Button(text='?',command=show_help,bg='yellow',fg='white',activebackground='yellow')
+        b4.place(x=560,y=6)
+
         win1.mainloop()
         
     def sgout():
@@ -315,6 +376,8 @@ def main(dec=None):
         global L
         win.destroy()
         L=[None,4]
+    def show_help():
+        messagebox.showinfo('Help',txt_mainmenu,icon='question')
     def change_on_hover(button,bg,fg):
             button.bind("<Enter>",func=lambda e:button.config(background=bg, foreground=fg))
             button.bind("<Leave>",func=lambda e:button.config(background= '#040720', foreground= 'white'))
@@ -382,6 +445,10 @@ def main(dec=None):
     b5=Button(fram3,text='X',command=destroy,bg='#040720',fg="white",activebackground='red')
     change_on_hover(b5,"red","#040720")
     b5.grid()
+
+    b9=Button(text='?',command=show_help,bg='#040720',fg='white',activebackground='yellow')
+    change_on_hover(b6,'yellow','#040720')
+    b9.place(x=560,y=6)
     
     l.grid(row=0,column=0,padx=10,pady=15)
     b1.grid(row=1,column=0,padx=10,pady=2)
@@ -394,3 +461,4 @@ def main(dec=None):
     fram2.place(x=220,y=24,height=370,width=180)
 
     win.mainloop()
+main(None)

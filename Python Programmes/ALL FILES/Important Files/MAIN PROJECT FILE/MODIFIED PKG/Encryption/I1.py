@@ -1,4 +1,29 @@
 from tkinter import *
+from tkinter import messagebox
+txt_logandcrea='''
+WELCOME TO BLACK SHADES ENCRYPTION SERVICES
+
+Welcome to our platform where we transform your valuable information into securely encrypted texts and files. Our cutting-edge encryption ensures the utmost protection, even against advanced AI attempts. Enjoy exploring the new realm of enhanced security with us!!
+
+To get started, first you have to create your own account with new username and password. Click on the 'Create' button and enter your new username and password. The Password must be of length min with 8 characters(with atleast one number and a special character) and make sure its unique in every way. If you have already created one,click on the login button and enter your credentials.
+'''
+
+txt_newlogin='''
+Hie there!!! This window is to create your new
+login credentials. Enter your username and password in the
+given fields. If in case, your username or password is
+already taken, you have to again click the 'Create' button
+from the previous window and enter a new username,
+password. You have Three Tries to successfully create your
+login id. After three tries, you have to close the window and
+try again'''
+
+txt_login='''
+Once you have created the login id, enter your username and
+password in the respective fields and click 'Sign In'.
+If it is an invalid username or password you have to reenter
+the login credentials for signing in. Happie Trying!!!'''
+
 def main(t,f):
     #gets executed when called in M1
     if t<4:
@@ -18,6 +43,8 @@ def main(t,f):
                     win1.destroy()
             def destroy1():
                 win1.destroy()
+            def show_help():
+                messagebox.showinfo('Help',txt_newlogin,icon='question')
             win.destroy()
 
             win1=Tk()
@@ -30,6 +57,11 @@ def main(t,f):
             win1.config(bg='black')
             win1.grid_rowconfigure(0,weight=1)
             win1.grid_columnconfigure(0,weight=1)
+
+            win1.title('Login')
+            img1=PhotoImage(file='Login Screen.png')
+            win1.iconphoto(False,img1)
+            
             
             img=PhotoImage(file="back.png")
             labelimg1=Label(win1,width=626,height=417,image=img)
@@ -62,6 +94,9 @@ def main(t,f):
             b3=Button(text='X',command=destroy1,bg='red',activebackground='red')
             b3.place(x=590,y=10)
 
+            b4=Button(text='?',command=show_help,bg='yellow')
+            b4.place(x=570,y=10)
+            
             e.grid(row=0,column=1,padx=10,pady=10)
 
             e1.grid(row=1,column=1,padx=10,pady=10)
@@ -89,6 +124,8 @@ def main(t,f):
             def destroy1():
                 win1.destroy()
                 return 1
+            def show_help():
+                messagebox.showinfo('Help',txt_login,icon='question')
             win.destroy()
 
             win1=Tk()
@@ -101,6 +138,10 @@ def main(t,f):
             win1.config(bg='black')
             win1.grid_rowconfigure(0,weight=1)
             win1.grid_columnconfigure(0,weight=1)
+
+            win1.title('Login')
+            img1=PhotoImage(file='Login Screen.png')
+            win1.iconphoto(False,img1)
 
             img=PhotoImage(file="back.png")
             labelimg1=Label(win1,width=626,height=417,image=img)
@@ -133,6 +174,9 @@ def main(t,f):
             b3=Button(text='X',command=destroy1,bg='red',activebackground='red')
             b3.place(x=590,y=10)
 
+            b4=Button(text='?',command=show_help,bg='yellow',activebackground='black')
+            b4.place(x=570,y=10)
+
             e.grid(row=0,column=1,padx=10,pady=10)
 
             e1.grid(row=1,column=1,padx=10,pady=10)
@@ -149,6 +193,8 @@ def main(t,f):
             #For red button
             win.destroy()
             return 1
+        def show_help():
+                messagebox.showinfo('Help',txt_logandcrea,icon='question')
 
         def change_on_hover(button,bg,fg):
             button.bind("<Enter>",func=lambda e:button.config(background=bg, foreground=fg))
@@ -173,6 +219,10 @@ def main(t,f):
         #For grid options weight=1 ensures grid can rescale with increas in row count
         win.grid_columnconfigure(0,weight=1)
         #For grid options weight=1 ensures grid can rescale with increas in row count
+
+        win.title('Login')
+        img1=PhotoImage(file='Login Screen.png')
+        win.iconphoto(False,img1)
 
         img=PhotoImage(file="back.png")
         labelimg=Label(win,width=626,height=417,image=img)
@@ -224,6 +274,11 @@ def main(t,f):
         change_on_hover(b3,"red","#040720")
         b3.grid()
 
+        b4=Button(text='?',font=('Calibri',15),command=show_help,bg='#040720',fg='white',activebackground='yellow')
+        change_on_hover(b4,'yellow','#040720')
+        b4.place(x=560,y=6)
+        
+        
         fram2.grid(row=0,column=0)
 
         win.mainloop()
@@ -236,6 +291,8 @@ def main(t,f):
         def destroy1():
             win.destroy()
             return 1
+        def show_help():
+                messagebox.showinfo('Help',txt_logandcrea,icon='question')
         def change_on_hover(button,bg,fg):
             button.bind("<Enter>",func=lambda e:button.config(background=bg, foreground=fg))
             button.bind("<Leave>",func=lambda e:button.config(background= '#040720', foreground= 'white'))
@@ -245,6 +302,10 @@ def main(t,f):
         win.config(bg='black')
         win.grid_rowconfigure(0,weight=1)
         win.grid_columnconfigure(0,weight=1)
+
+        win.title('Login')
+        img1=PhotoImage(file='Login Screen.png')
+        win.iconphoto(False,img1)
 
         img=PhotoImage(file="back.png")
         labelimg=Label(win,width=626,height=417,image=img)
@@ -262,8 +323,13 @@ def main(t,f):
         b3=Button(text='X',command=destroy1,bg='#040720',fg="white",activebackground='red')
         change_on_hover(b3,"red","white")
 
+        b4=Button(text='?',font=('Calibri',15),command=show_help,bg='#040720',fg='white',activebackground='yellow')
+          
+
         l.grid(row=0,column=0,padx=10,pady=10)
         l1.grid(row=1,column=0)
         b3.place(x=590,y=10)
+        b4.place(x=570,y=10)
         fram.place()
         win.mainloop()
+main(t=1,f=None)
