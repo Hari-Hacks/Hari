@@ -15,7 +15,7 @@ class FrontierMappingGUI:
 
         # 0: Unknown, 1: Obstacle, 2: Explored
         self.memory = [[0 for _ in range(n)] for _ in range(n)]
-        self.robot_pos = (0, 0)
+        self.robot_pos = (3,5)
         self.hidden_walls = set()
 
         self.root.title("Frontier-Based Mapping Visualizer")
