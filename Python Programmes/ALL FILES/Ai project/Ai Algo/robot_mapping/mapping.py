@@ -16,6 +16,7 @@ class OccupancyGridMap:
         self.size = size
         self.grid = [[UNKNOWN for _ in range(size)] for _ in range(size)]
         self.visited: set[GridCell] = set()
+        self.sensor_observations: dict[GridCell, int] = {}
 
     def in_bounds(self, cell: GridCell) -> bool:
         row, col = cell
@@ -46,6 +47,17 @@ class OccupancyGridMap:
 
     def is_visited(self, cell: GridCell) -> bool:
         return cell in self.visited
+
+    def record_sensor_observation(self, cell: GridCell) -> None:
+        if not self.in_bounds(cell):
+            return
+        self.sensor_observations[cell] = self.sensor_observations.get(cell, 0) + 1
+
+    def sensor_observation_count(self, cell: GridCell) -> int:
+        return self.sensor_observations.get(cell, 0)
+
+    def is_frontier_explored(self, cell: GridCell) -> bool:
+        return self.is_visited(cell) or self.sensor_observation_count(cell) >= 2
 
     def neighbors(self, cell: GridCell) -> list[GridCell]:
         row, col = cell
@@ -78,6 +90,7 @@ class OccupancyGridMap:
             target = step_cell(robot_cell, sensed_heading)
             if not self.in_bounds(target):
                 continue
+            self.record_sensor_observation(target)
             sensor_value = ir_readings.get(sensor_name, 0)
             if sensor_value == 1:
                 self.mark_obstacle(target)

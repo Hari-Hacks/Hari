@@ -14,6 +14,8 @@ def detect_frontiers(occupancy_map: OccupancyGridMap) -> list[GridCell]:
             cell = (row, col)
             if occupancy_map.get(cell) != FREE:
                 continue
+            if occupancy_map.is_frontier_explored(cell):
+                continue
             if any(occupancy_map.get(neighbor) == UNKNOWN for neighbor in occupancy_map.neighbors(cell)):
                 frontiers.append(cell)
     return frontiers
