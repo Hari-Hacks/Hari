@@ -1,156 +1,203 @@
 import tkinter as tk
-from tkinter import messagebox
+import serial
 import time
 import heapq
 
-class FrontierMappingGUI:
-    def __init__(self, root, n=8):
-        self.root = root
-        self.n = n
-        self.cell_size = 45
-        self.step_count = 0
+# -------- SERIAL --------
+ser = serial.Serial('/dev/ttyUSB0', 9600, timeout=2)
+time.sleep(2)
 
-        self.memory = [[0 for _ in range(n)] for _ in range(n)]
-        self.robot_pos = None  
-        self.hidden_walls = set()
+# -------- GRID --------
+ROWS, COLS = 4, 4
+CELL_SIZE = 60
 
-        self.root.title("WINDOW 1: Real World")
-        self.canvas = tk.Canvas(root, width=n*self.cell_size, height=n*self.cell_size, bg="#ecf0f1")
-        self.canvas.pack(padx=10, pady=10)
+UNKNOWN, OBSTACLE, FREE = 0, 1, 2
+grid = [[UNKNOWN for _ in range(COLS)] for _ in range(ROWS)]
 
-        self.mem_win = tk.Toplevel(root)
-        self.mem_win.title("WINDOW 2: Bot Brain")
-        self.mem_canvas = tk.Canvas(self.mem_win, width=n*self.cell_size, height=n*self.cell_size, bg="#2c3e50")
-        self.mem_canvas.pack(padx=10, pady=10)
+# -------- ROBOT STATE --------
+x, y = 0, 0
+direction = 1  # 0=N,1=E,2=S,3=W
 
-        self.start_btn = tk.Button(root, text="Start Mapping", command=self.explore, bg="#2980b9", fg="white")
-        self.start_btn.pack(pady=5)
+# -------- GUI --------
+cell_px = 60
+root = tk.Tk()
+root.title("Live FBE Mapping")
 
-        self.cells = {}
-        self.mem_cells = {}
-        self.draw_grids()
-        
-        self.canvas.bind("<Button-1>", self.toggle_wall)
-        self.canvas.bind("<Button-3>", self.set_robot_start)
+canvas = tk.Canvas(root, width=COLS*cell_px, height=ROWS*cell_px)
+canvas.pack()
 
-    def draw_grids(self):
-        for r in range(self.n):
-            for c in range(self.n):
-                x1, y1 = c * self.cell_size, r * self.cell_size
-                x2, y2 = x1 + self.cell_size, y1 + self.cell_size
-                self.cells[(r, c)] = self.canvas.create_rectangle(x1, y1, x2, y2, fill="#bdc3c7", outline="white")
-                self.mem_cells[(r, c)] = self.mem_canvas.create_rectangle(x1, y1, x2, y2, fill="#34495e", outline="#2c3e50")
-                # Add Coordinate Labels to the GUI for easier reading
-                self.canvas.create_text(x1+10, y1+10, text=f"{r},{c}", font=("Arial", 6), fill="black")
+cells = {}
+for r in range(ROWS):
+    for c in range(COLS):
+        rect = canvas.create_rectangle(
+            c*cell_px, r*cell_px,
+            c*cell_px+cell_px, r*cell_px+cell_px,
+            fill="#bdc3c7", outline="white"
+        )
+        cells[(r,c)] = rect
 
-    def update_memory_ui(self):
-        for r in range(self.n):
-            for c in range(self.n):
-                state = self.memory[r][c]
-                color = "#34495e" 
-                if state == 1: color = "#1a1a1a" 
-                if state == 2: color = "#2ecc71" 
-                self.mem_canvas.itemconfig(self.mem_cells[(r, c)], fill=color)
-        self.mem_win.update()
+def draw():
+    canvas.delete("robot")
 
-    def set_robot_start(self, event):
-        c, r = event.x // self.cell_size, event.y // self.cell_size
-        self.robot_pos = (r, c)
-        self.memory[r][c] = 2
-        print(f"\n[INIT] Robot manually placed at: {self.robot_pos}")
-        self.update_memory_ui()
+    for r in range(ROWS):
+        for c in range(COLS):
+            val = grid[r][c]
+            color = "#bdc3c7" if val == UNKNOWN else "#e74c3c" if val == OBSTACLE else "#2ecc71"
+            canvas.itemconfig(cells[(r,c)], fill=color)
 
-    def toggle_wall(self, event):
-        c, r = event.x // self.cell_size, event.y // self.cell_size
-        if (r, c) in self.hidden_walls:
-            self.hidden_walls.remove((r, c))
-            self.canvas.itemconfig(self.cells[(r, c)], fill="#bdc3c7")
+    canvas.create_oval(
+        x*cell_px+15, y*cell_px+15,
+        x*cell_px+45, y*cell_px+45,
+        fill="#3498db", tags="robot"
+    )
+
+# -------- UPDATE GRID --------
+def update_grid(L, F, R):
+    global x, y, direction
+
+    directions = {
+        0: [(-1,0), (0,-1), (0,1)],
+        1: [(0,1), (-1,0), (1,0)],
+        2: [(1,0), (0,1), (0,-1)],
+        3: [(0,-1), (1,0), (-1,0)]
+    }
+
+    moves = directions[direction]
+    values = [F, L, R]
+
+    for (dy, dx), val in zip(moves, values):
+        ny, nx = y + dy, x + dx
+        if 0 <= ny < ROWS and 0 <= nx < COLS:
+            grid[ny][nx] = OBSTACLE if val == 0 else FREE
+
+# -------- FBE --------
+def get_frontiers():
+    frontiers = []
+    for r in range(ROWS):
+        for c in range(COLS):
+            if grid[r][c] == UNKNOWN:
+                for dr, dc in [(0,1),(0,-1),(1,0),(-1,0)]:
+                    nr, nc = r+dr, c+dc
+                    if 0 <= nr < ROWS and 0 <= nc < COLS:
+                        if grid[nr][nc] == FREE:
+                            frontiers.append((r,c))
+                            break
+    return frontiers
+
+# -------- A* --------
+def astar(start, goal):
+    q = [(0, start)]
+    came = {start: None}
+    cost = {start: 0}
+
+    while q:
+        _, cur = heapq.heappop(q)
+
+        if cur == goal:
+            path = []
+            while cur:
+                path.append(cur)
+                cur = came[cur]
+            return path[::-1]
+
+        for dr, dc in [(0,1),(0,-1),(1,0),(-1,0)]:
+            nr, nc = cur[0]+dr, cur[1]+dc
+            if 0 <= nr < ROWS and 0 <= nc < COLS:
+                if grid[nr][nc] != OBSTACLE:
+                    new = cost[cur] + 1
+                    if (nr,nc) not in cost or new < cost[(nr,nc)]:
+                        cost[(nr,nc)] = new
+                        pr = new + abs(nr-goal[0]) + abs(nc-goal[1])
+                        heapq.heappush(q, (pr, (nr,nc)))
+                        came[(nr,nc)] = cur
+    return None
+
+# -------- DECIDE --------
+def decide(next_cell):
+    global x, y, direction
+
+    ny, nx = next_cell
+
+    if ny < y: target = 0
+    elif nx > x: target = 1
+    elif ny > y: target = 2
+    else: target = 3
+
+    if target == direction:
+        return 'F'
+    elif (direction + 1) % 4 == target:
+        direction = (direction + 1) % 4
+        return 'R'
+    else:
+        direction = (direction - 1) % 4
+        return 'L'
+
+def move_forward():
+    global x, y, direction
+
+    if direction == 0: y -= 1
+    elif direction == 1: x += 1
+    elif direction == 2: y += 1
+    elif direction == 3: x -= 1
+
+# -------- REQUEST IR --------
+def get_ir():
+    ser.write(b'I')
+    line = ser.readline().decode().strip()
+    return map(int, line.split(','))
+
+# -------- MAIN LOOP --------
+def loop():
+    global x, y
+
+    try:
+        # 🔹 Step 1: Ask for IR
+        L, F, R = get_ir()
+
+        # 🔹 Step 2: Update map
+        grid[y][x] = FREE
+        update_grid(L, F, R)
+
+        # 🔹 Step 3: FBE
+        frontiers = get_frontiers()
+
+        if not frontiers:
+            ser.write(b'S')
+            print("DONE")
+            return
+
+        # 🔹 Step 4: Choose nearest frontier
+        target = min(frontiers, key=lambda f: abs(f[0]-y)+abs(f[1]-x))
+
+        # 🔹 Step 5: Plan path
+        path = astar((y,x), target)
+
+        if path and len(path) > 1:
+            cmd = decide(path[1])
         else:
-            self.hidden_walls.add((r, c))
-            self.canvas.itemconfig(self.cells[(r, c)], fill="#e74c3c")
+            cmd = 'S'
 
-    def get_frontiers(self):
-        frontiers = []
-        for r in range(self.n):
-            for c in range(self.n):
-                if self.memory[r][c] == 0:
-                    for dr, dc in [(0,1),(0,-1),(1,0),(-1,0)]:
-                        nr, nc = r + dr, c + dc
-                        if 0 <= nr < self.n and 0 <= nc < self.n:
-                            if self.memory[nr][nc] == 2:
-                                frontiers.append((r, c))
-                                break
-        return frontiers
+        # 🔹 Safety
+        if F == 0:
+            cmd = 'S'
 
-    def find_path(self, start, goal):
-        queue = [(0, start)]
-        came_from = {start: None}
-        cost = {start: 0}
-        while queue:
-            _, curr = heapq.heappop(queue)
-            if curr == goal:
-                path = []
-                while curr:
-                    path.append(curr); curr = came_from[curr]
-                return path[::-1]
-            for dr, dc in [(0,1),(0,-1),(1,0),(-1,0)]:
-                nxt = (curr[0] + dr, curr[1] + dc)
-                if 0 <= nxt[0] < self.n and 0 <= nxt[1] < self.n:
-                    if self.memory[nxt[0]][nxt[1]] != 1:
-                        new_cost = cost[curr] + 1
-                        if nxt not in cost or new_cost < cost[nxt]:
-                            cost[nxt] = new_cost
-                            priority = new_cost + abs(nxt[0]-goal[0]) + abs(nxt[1]-goal[1])
-                            heapq.heappush(queue, (priority, nxt))
-                            came_from[nxt] = curr
-        return None
+        # 🔹 Step 6: Send command
+        ser.write(cmd.encode())
+        print("CMD:", cmd)
 
-    def explore(self):
-        if self.robot_pos is None: return
-        
-        while True:
-            self.step_count += 1
-            frontiers = self.get_frontiers()
-            
-            if not frontiers: 
-                print("\n[FINISH] No more frontiers found. Map complete.")
-                break
+        # 🔹 Step 7: Update position
+        if cmd == 'F':
+            move_forward()
 
-            # Numerical Analysis Log
-            print(f"\n--- STEP {self.step_count} ---")
-            print(f"Bot Position: {self.robot_pos}")
-            print(f"Found {len(frontiers)} frontiers: {frontiers}")
-            
-            # Select target using Manhattan Math: |r1-r2| + |c1-c2|
-            target = min(frontiers, key=lambda f: abs(f[0]-self.robot_pos[0]) + abs(f[1]-self.robot_pos[1]))
-            print(f"Selected Target: {target} (Closest Frontier)")
-            
-            path = self.find_path(self.robot_pos, target)
-            print(f"Planned Path: {path}")
+        # 🔹 Step 8: Update GUI
+        draw()
 
-            if not path:
-                self.memory[target[0]][target[1]] = 1
-                continue
+    except Exception as e:
+        print("Error:", e)
 
-            for step in path[1:]:
-                # Check for walls in the "Real World"
-                if step in self.hidden_walls:
-                    print(f"!! Obstacle detected at {step}. Re-calculating...")
-                    self.memory[step[0]][step[1]] = 1
-                    self.update_memory_ui()
-                    break
+    root.after(500, loop)
 
-                self.robot_pos = step
-                self.memory[step[0]][step[1]] = 2
-                print(f"Moving to {step}")
-                self.canvas.itemconfig(self.cells[step], fill="#2ecc71")
-                self.update_memory_ui()
-                time.sleep(0.3)
-
-        messagebox.showinfo("Done", "Exploration finished!")
-
-if __name__ == "__main__":
-    root = tk.Tk()
-    app = FrontierMappingGUI(root, n=8)
-    root.mainloop()
-    
+# -------- START --------
+draw()
+loop()
+root.mainloop()
