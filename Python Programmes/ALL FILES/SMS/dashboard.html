@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CYBER-VISION // IIoT NEXUS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-base: #030712;
+            --neon-blue: #00f0ff;
+            --neon-red: #ff003c;
+            --neon-green: #39ff14;
+            --glass-bg: rgba(16, 24, 39, 0.6);
+            --glass-border: rgba(0, 240, 255, 0.3);
+            --text-main: #e2e8f0;
+            --text-glow: 0 0 10px rgba(0, 240, 255, 0.8);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            font-family: 'Rajdhani', sans-serif;
+            height: 100vh;
+            overflow: hidden;
+            background-image: 
+                linear-gradient(rgba(0, 240, 255, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 240, 255, 0.05) 1px, transparent 1px);
+            background-size: 40px 40px;
+            background-position: center center;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        /* Scanline overlay */
+        body::after {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            background-size: 100% 4px, 6px 100%;
+            z-index: 100;
+            pointer-events: none;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 3rem;
+            border-bottom: 2px solid var(--neon-blue);
+            background: linear-gradient(90deg, rgba(0,240,255,0.1) 0%, transparent 50%, rgba(255,0,60,0.1) 100%);
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.2);
+            position: relative;
+        }
+
+        .sys-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2rem;
+            font-weight: 900;
+            color: #fff;
+            text-shadow: var(--text-glow);
+            letter-spacing: 4px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .glitch-icon {
+            color: var(--neon-blue);
+            animation: glitch-anim 2s infinite linear alternate-reverse;
+        }
+
+        @keyframes glitch-anim {
+            0% { clip-path: inset(10% 0 30% 0); transform: translate(-2px, 2px); }
+            20% { clip-path: inset(80% 0 5% 0); transform: translate(2px, -2px); }
+            40% { clip-path: inset(40% 0 40% 0); transform: translate(-2px, 2px); }
+            60% { clip-path: inset(20% 0 60% 0); transform: translate(2px, -2px); }
+            80% { clip-path: inset(60% 0 20% 0); transform: translate(-2px, 2px); }
+            100% { clip-path: inset(30% 0 70% 0); transform: translate(2px, -2px); }
+        }
+
+        .sys-time {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 1.5rem;
+            color: var(--neon-blue);
+            text-shadow: 0 0 5px var(--neon-blue);
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 3fr 1.2fr;
+            grid-template-rows: auto 1fr;
+            gap: 1.5rem;
+            padding: 1.5rem 3rem;
+            flex: 1;
+            overflow: hidden;
+            position: relative;
+            z-index: 10;
+        }
+
+        .hud-panel {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 4px;
+            backdrop-filter: blur(8px);
+            position: relative;
+            box-shadow: inset 0 0 20px rgba(0, 240, 255, 0.05);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .hud-panel::before {
+            content: '';
+            position: absolute;
+            top: -1px; left: -1px;
+            width: 30px; height: 30px;
+            border-top: 3px solid var(--neon-blue);
+            border-left: 3px solid var(--neon-blue);
+            box-shadow: -2px -2px 10px rgba(0, 240, 255, 0.5);
+        }
+
+        .hud-panel::after {
+            content: '';
+            position: absolute;
+            bottom: -1px; right: -1px;
+            width: 30px; height: 30px;
+            border-bottom: 3px solid var(--neon-blue);
+            border-right: 3px solid var(--neon-blue);
+            box-shadow: 2px 2px 10px rgba(0, 240, 255, 0.5);
+        }
+
+        .panel-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1rem;
+            color: var(--neon-blue);
+            padding: 0.8rem 1.5rem;
+            border-bottom: 1px solid rgba(0, 240, 255, 0.2);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .status-badge {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.8rem;
+            padding: 2px 8px;
+            background: rgba(57, 255, 20, 0.2);
+            color: var(--neon-green);
+            border: 1px solid var(--neon-green);
+            border-radius: 2px;
+            box-shadow: 0 0 10px rgba(57, 255, 20, 0.4);
+            animation: blink 2s infinite;
+        }
+
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+
+        .stats-container {
+            grid-column: 1 / -1;
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .stat-box {
+            flex: 1;
+            background: linear-gradient(45deg, rgba(16, 24, 39, 0.8), rgba(0, 240, 255, 0.1));
+            border: 1px solid var(--neon-blue);
+            padding: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.1);
+        }
+
+        .stat-box.alert {
+            background: linear-gradient(45deg, rgba(16, 24, 39, 0.8), rgba(255, 0, 60, 0.1));
+            border-color: var(--neon-red);
+            box-shadow: 0 0 15px rgba(255, 0, 60, 0.1);
+        }
+
+        .stat-box::before {
+            content: '';
+            position: absolute;
+            left: 0; top: 0; bottom: 0;
+            width: 4px;
+            background: var(--neon-blue);
+            box-shadow: 0 0 10px var(--neon-blue);
+        }
+        .stat-box.alert::before {
+            background: var(--neon-red);
+            box-shadow: 0 0 10px var(--neon-red);
+        }
+
+        .stat-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 3rem;
+            font-weight: 700;
+            color: #fff;
+            text-shadow: 0 0 15px rgba(255,255,255,0.5);
+        }
+
+        .stat-label {
+            font-size: 1.1rem;
+            color: var(--neon-blue);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+        .stat-box.alert .stat-label { color: var(--neon-red); }
+
+        .camera-view {
+            flex: 1;
+            position: relative;
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #000;
+            overflow: hidden;
+        }
+
+        .camera-view img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            filter: contrast(1.1) brightness(1.1);
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Scanning laser effect over image */
+        .scanner-laser {
+            position: absolute;
+            width: 100%;
+            height: 3px;
+            background: var(--neon-blue);
+            box-shadow: 0 0 20px var(--neon-blue), 0 0 40px var(--neon-blue);
+            opacity: 0.7;
+            z-index: 3;
+            animation: scan 3s linear infinite;
+        }
+
+        @keyframes scan {
+            0% { top: 0; opacity: 0; }
+            10% { opacity: 0.8; }
+            90% { opacity: 0.8; }
+            100% { top: 100%; opacity: 0; }
+        }
+
+        .crosshair {
+            position: absolute;
+            width: 60px; height: 60px;
+            border: 2px solid rgba(255,255,255,0.2);
+            z-index: 3;
+            pointer-events: none;
+        }
+        .crosshair::before, .crosshair::after {
+            content: ''; position: absolute; background: rgba(0,240,255,0.5);
+        }
+        .crosshair::before { width: 100%; height: 1px; top: 50%; left: 0; }
+        .crosshair::after { height: 100%; width: 1px; left: 50%; top: 0; }
+        .ch-tl { top: 10%; left: 10%; border-right: none; border-bottom: none; }
+        .ch-br { bottom: 10%; right: 10%; border-left: none; border-top: none; }
+
+        .log-terminal {
+            flex: 1;
+            padding: 1rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            font-family: 'Share Tech Mono', monospace;
+        }
+
+        .log-terminal::-webkit-scrollbar { width: 4px; }
+        .log-terminal::-webkit-scrollbar-thumb { background: var(--neon-blue); }
+
+        .log-item {
+            padding: 0.6rem;
+            border-left: 2px solid var(--neon-blue);
+            background: rgba(0, 240, 255, 0.05);
+            font-size: 0.9rem;
+            line-height: 1.4;
+            color: #a5b4fc;
+            text-shadow: 0 0 2px rgba(165, 180, 252, 0.5);
+        }
+
+        .log-item.alert-log {
+            border-left-color: var(--neon-red);
+            background: rgba(255, 0, 60, 0.05);
+            color: #fca5a5;
+        }
+
+        .data-overlay {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            z-index: 4;
+            background: rgba(0,0,0,0.7);
+            border: 1px solid var(--neon-blue);
+            padding: 10px;
+            font-family: 'Share Tech Mono', monospace;
+            color: var(--neon-blue);
+            font-size: 0.85rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+            .hud-panel {
+                min-height: 400px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="sys-title">
+            <svg class="glitch-icon" xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+            NEXUS VISUAL // IIoT
+        </div>
+        <div class="sys-time" id="clock">00:00:00:00</div>
+    </header>
+
+    <div class="main-grid">
+        <div class="stats-container">
+            <div class="stat-box">
+                <div>
+                    <div class="stat-label">Total Inferences</div>
+                    <div style="font-family: 'Share Tech Mono'; color: #64748b; font-size: 0.9rem; margin-top: 5px;">YOLOv11 Edge Node Active</div>
+                </div>
+                <div class="stat-value" id="valImages">000</div>
+            </div>
+            <div class="stat-box alert">
+                <div>
+                    <div class="stat-label">Security Intrusions</div>
+                    <div style="font-family: 'Share Tech Mono'; color: #64748b; font-size: 0.9rem; margin-top: 5px;">Restricted Zone Breaches</div>
+                </div>
+                <div class="stat-value" style="color: var(--neon-red);" id="valAlerts">000</div>
+            </div>
+        </div>
+
+        <div class="hud-panel" style="grid-column: 1;">
+            <div class="panel-title">
+                <span><span style="color: #fff;">LIVE //</span> MAIN OPTIC SENSOR</span>
+                <span class="status-badge">STREAM ACTIVE</span>
+            </div>
+            <div class="camera-view">
+                <div class="scanner-laser"></div>
+                <div class="crosshair ch-tl"></div>
+                <div class="crosshair ch-br"></div>
+                
+                <img id="mainFeed" src="" alt="Awaiting Stream..." style="display: none;">
+                
+                <div class="data-overlay">
+                    TARGET: <span id="overlayFile">N/A</span><br>
+                    CONFIDENCE: <span style="color: var(--neon-green)">HIGH</span><br>
+                    LATENCY: <span id="overlayPing">12</span>ms
+                </div>
+            </div>
+        </div>
+
+        <div class="hud-panel" style="grid-column: 2;">
+            <div class="panel-title">
+                <span>SYSTEM TERMINAL</span>
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--neon-blue)"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>
+            </div>
+            <div class="log-terminal" id="sysLogs">
+                <div class="log-item" style="color: var(--neon-blue);">
+                    [SYS] INITIATING NEXUS VISUAL PROTOCOLS...<br>
+                    [SYS] ESTABLISHING CONNECTION TO EDGE NODE...
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Cyber Clock
+        setInterval(() => {
+            const now = new Date();
+            const h = String(now.getHours()).padStart(2, '0');
+            const m = String(now.getMinutes()).padStart(2, '0');
+            const s = String(now.getSeconds()).padStart(2, '0');
+            const ms = String(Math.floor(now.getMilliseconds() / 10)).padStart(2, '0');
+            document.getElementById('clock').innerText = `${h}:${m}:${s}:${ms}`;
+            
+            // Random ping
+            if (Math.random() > 0.8) {
+                document.getElementById('overlayPing').innerText = Math.floor(Math.random() * 15) + 10;
+            }
+        }, 50);
+
+        let lastImageFile = null;
+
+        async function pullNexusData() {
+            try {
+                // In case they run it directly via file://, we try relative paths or localhost
+                const host = window.location.protocol === 'file:' ? 'http://localhost:5001' : '';
+                const res = await fetch(`${host}/api/data`);
+                
+                if (!res.ok) throw new Error("Link Severed");
+                const data = await res.json();
+
+                // Update digits with padding
+                document.getElementById('valImages').innerText = String(data.total_images).padStart(3, '0');
+                document.getElementById('valAlerts').innerText = String(data.total_alerts).padStart(3, '0');
+
+                // Update Camera Feed
+                if (data.latest_image && data.latest_image !== lastImageFile) {
+                    const img = document.getElementById('mainFeed');
+                    img.src = `${host}/inference/${data.latest_image}?ts=${Date.now()}`;
+                    img.style.display = 'block';
+                    
+                    document.getElementById('overlayFile').innerText = data.latest_image;
+                    lastImageFile = data.latest_image;
+                }
+
+                // Update Terminal Logs
+                if (data.logs && data.logs.length > 0) {
+                    const term = document.getElementById('sysLogs');
+                    let newHtml = '';
+                    data.logs.forEach(line => {
+                        const isAlert = line.includes('[ALERT]');
+                        const cssClass = isAlert ? 'log-item alert-log' : 'log-item';
+                        
+                        // Cyberpunk styling for the text
+                        let fLine = line.replace('[ALERT]', '<b style="color: var(--neon-red)">[CRITICAL THREAT]</b>');
+                        fLine = fLine.replace('Person detected', '<span style="color: #fff; background: rgba(255,0,60,0.3); padding: 0 4px;">PERSON DETECTED</span>');
+                        
+                        newHtml += `<div class="${cssClass}">> ${fLine}</div>`;
+                    });
+
+                    const firstCurrent = term.firstElementChild ? term.firstElementChild.innerText : '';
+                    if (!firstCurrent.includes(data.logs[0].substring(0,10))) {
+                        term.innerHTML = newHtml;
+                    }
+                }
+
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        setInterval(pullNexusData, 1000);
+        pullNexusData();
+    </script>
+</body>
+</html>
