@@ -1,1 +1,1 @@
-{"image": "infer_0127.jpg", "person_detected": true, "width": 640, "height": 480, "boxes": [{"x1": 105, "y1": 63, "x2": 445, "y2": 478, "conf": 0.7122994065284729}]}
+{"image": "infer_0164.jpg", "person_detected": true, "width": 640, "height": 480, "boxes": [{"x1": 160, "y1": 277, "x2": 426, "y2": 479, "conf": 0.5246835947036743}]}
